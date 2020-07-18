@@ -184,6 +184,10 @@ def infer_on_stream(args, client, app_state):
         args.input = 0
     elif args.input.endswith('.jpg') or args.input.endswith('.bmp'):
         image_flag = True
+    elif args.input.endswith('.mp4') or args.input.endswith('.avi'):
+        image_flag = False
+    else: 
+        raise ValueError("Unsupported input file type")
 
     if (image_flag):
         max_skip_counter = 0
@@ -208,13 +212,13 @@ def infer_on_stream(args, client, app_state):
 
         ### Start asynchronous inference for specified request ###
         infer_start = time.time()
-        infer_network.exec_net(p_frame)
+        infer_network.exec_net(0, p_frame)
 
         ### Wait for the result ###
-        if infer_network.wait() == 0:
+        if infer_network.wait(0) == 0:
 
             ### Get the results of the inference request ###
-            net_output = np.squeeze(infer_network.get_output())
+            net_output = np.squeeze(infer_network.get_output(0))
             objects_in_frame, app_state["detection_current"]["count"] = extract_objects(net_output, args.prob_threshold)
             
             # Skip frames
